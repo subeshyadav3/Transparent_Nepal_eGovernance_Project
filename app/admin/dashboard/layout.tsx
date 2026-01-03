@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/dashboard/budgets", label: "Budgets" },
     { href: "/admin/dashboard/projects", label: "Projects" },
     { href: "/admin/dashboard/contractors", label: "Contractors" },
-    { href: "/admin/dashboard/tenders", label: "Tenders" },
+    // { href: "/admin/dashboard/tenders", label: "Tenders" },
     { href: "/admin/dashboard/complaints", label: "Complaints" },
     { href: "/admin/dashboard/analytics", label: "Analytics" },
   ]

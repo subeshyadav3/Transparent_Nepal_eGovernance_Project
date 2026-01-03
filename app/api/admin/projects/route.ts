@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 import { ProjectStatus } from "@/app/generated/prisma/enums";
+
 
 interface SessionUser {
   id: string;
   role: "ADMIN" | "CITIZEN";
   kycVerified: boolean;
 }
+
 
 interface Session {
   user: SessionUser;
@@ -54,72 +56,106 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = (await getServerSession(authOptions)) as Session | null;
+  const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ADMIN")
+  if (!session || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const url = new URL(req.url);
-  const projectId = url.searchParams.get("id");
-
-  // Check if uploading report
-  const contentType = req.headers.get("content-type") || "";
-  if (contentType.includes("multipart/form-data")) {
-    const formData = await req.formData();
-    const title = formData.get("title") as string;
-    const summary = (formData.get("summary") as string) ?? "";
-    const file = formData.get("file") as File | null;
-
-    if (!projectId) return NextResponse.json({ error: "Project ID required" }, { status: 400 });
-    if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
-
-    let fileUrl: string | null = null;
-    if (file) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const fs = require("fs");
-      const path = require("path");
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, file.name);
-      fs.writeFileSync(filePath, buffer);
-      fileUrl = `/uploads/${file.name}`;
-    }
-
-    const newReport = await prisma.projectReport.create({
-      data: {
-        projectId,
-        title,
-        summary,
-        fileUrl,
-      },
-    });
-
-    return NextResponse.json(newReport);
   }
 
-  // Normal project creation
-  const body = await req.json();
-  const { budgetId, projectName, description, contractorId, startDate, endDate } = body;
-
-  if (!budgetId || !projectName || !contractorId)
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-
-  const project = await prisma.project.create({
-    data: {
-      budgetId,
-      projectName,
-      description,
+  try {
+    const body = await req.json();
+    const { 
+      projectName, 
+      description, 
+      budgetId, 
+      totalCost, 
+      startDate, 
+      endDate,
       contractorId,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      status: ProjectStatus.PLANNED,
-      progress: 0,
-      totalCost: 0,
-    },
-  });
+      newContractor 
+    } = body;
 
-  return NextResponse.json(project);
+    const cost = parseFloat(totalCost);
+
+    if (!projectName || !budgetId || isNaN(cost) || !startDate || !endDate) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      
+      // Check budget and funds availability
+      const budget = await tx.budget.findUnique({ where: { id: budgetId } });
+      if (!budget) throw new Error("Target budget record not found");
+      
+      if (Number(budget.remainingAmount) < cost) {
+        throw new Error(`Insufficient funds. Available: ${budget.remainingAmount}`);
+      }
+
+      // Handle Contractor logic
+      let finalContractorId = contractorId;
+
+      if (newContractor && !contractorId) {
+        const createdContractor = await tx.contractor.create({
+          data: {
+            companyName: newContractor.companyName,
+            registrationNo: newContractor.registrationNo,
+            contactPerson: newContractor.contactPerson,
+            phone: newContractor.phone,
+            email: newContractor.email,
+          },
+        });
+        finalContractorId = createdContractor.id;
+      }
+
+      if (!finalContractorId) throw new Error("Contractor assignment failed");
+
+      // Create Project record
+      const newProject = await tx.project.create({
+        data: {
+          projectName,
+          description,
+          budgetId,
+          contractorId: finalContractorId,
+          totalCost: cost,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          status: ProjectStatus.PLANNED,
+          progress: 0,
+        },
+      });
+
+      // Update budget totals
+      await tx.budget.update({
+        where: { id: budgetId },
+        data: {
+          spentAmount: { increment: cost },
+          remainingAmount: { decrement: cost },
+        },
+      });
+
+      // Create audit trail entry
+      await tx.budgetTransaction.create({
+        data: {
+          budgetId,
+          projectId: newProject.id,
+          amount: cost,
+          transactionDate: new Date(),
+          remarks: `Project Allocation: ${projectName}`,
+        },
+      });
+
+      return newProject;
+    });
+
+    return NextResponse.json(result, { status: 201 });
+
+  } catch (error: any) {
+    console.error("Project Deployment Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" }, 
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(req: NextRequest) {

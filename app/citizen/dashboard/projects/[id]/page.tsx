@@ -29,7 +29,7 @@ export default function ProjectDetailsCitizen() {
   const [loading, setLoading] = useState(false);
 
   const fetchProject = async () => {
-    const res = await fetch(`/api/projects/citizen?id=${params.id}`);
+    const res = await fetch(`/api/citizen/projects?id=${params.id}`);
     const data = await res.json();
     setProject(data);
   };
@@ -45,7 +45,7 @@ export default function ProjectDetailsCitizen() {
       if (action === "complaint") { payload.title = complaintTitle; payload.description = complaintDescription; }
       if (action === "vote") payload.type = type;
 
-      const res = await fetch("/api/projects/citizen", {
+      const res = await fetch("/api/citizen/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -17,7 +17,6 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("Seeding database...");
 
-  // --- USERS ---
   const admin = await prisma.user.create({
     data: {
       name: "Admin User",
@@ -25,6 +24,8 @@ async function main() {
       password: await bcrypt.hash("admin123", 10),
       role: Role.ADMIN,
       kycVerified: true,
+      citizenshipNumber: "ADMIN-001",
+      idPhotoUrl: "https://example.com/admin.jpg",
     },
   });
 
@@ -35,6 +36,8 @@ async function main() {
       password: await bcrypt.hash("ram123", 10),
       role: Role.CITIZEN,
       kycVerified: true,
+      citizenshipNumber: "CTZ-101-RAM",
+      idPhotoUrl: "https://example.com/ram.jpg",
     },
   });
 
@@ -45,10 +48,11 @@ async function main() {
       password: await bcrypt.hash("sita123", 10),
       role: Role.CITIZEN,
       kycVerified: false,
+      citizenshipNumber: "CTZ-202-SITA",
+      idPhotoUrl: "https://example.com/sita.jpg",
     },
   });
 
-  // --- DEPARTMENTS ---
   const deptData = [
     { name: "Public Works", description: "Infrastructure", fiscalYear: "2082/83" },
     { name: "Health", description: "Hospitals", fiscalYear: "2082/83" },
@@ -61,7 +65,6 @@ async function main() {
     departments.push(await prisma.department.create({ data: d }));
   }
 
-  // --- BUDGETS ---
   const budgets = [];
   for (const dept of departments) {
     budgets.push(
@@ -77,7 +80,6 @@ async function main() {
     );
   }
 
-  // --- CONTRACTORS ---
   const contractor1 = await prisma.contractor.create({
     data: {
       companyName: "Himalayan Infrastructure Pvt. Ltd.",
@@ -100,7 +102,6 @@ async function main() {
     },
   });
 
-  // --- PROJECTS (5 REAL PROJECTS) ---
   const project1 = await prisma.project.create({
     data: {
       budgetId: budgets[0].id,
@@ -175,7 +176,6 @@ async function main() {
     },
   });
 
-  // --- PROJECT REPORT ---
   await prisma.projectReport.create({
     data: {
       projectId: project1.id,
@@ -184,7 +184,6 @@ async function main() {
     },
   });
 
-  // --- RESCHEDULE LOG ---
   await prisma.rescheduleLog.create({
     data: {
       projectId: project1.id,
@@ -194,7 +193,6 @@ async function main() {
     },
   });
 
-  // --- COMPLAINTS (CITIZEN ONLY) ---
   await prisma.complaint.create({
     data: {
       projectId: project2.id,
@@ -215,7 +213,7 @@ async function main() {
     },
   });
 
-  console.log("✅ Database seeded successfully with 4 departments, budgets, 5 projects, 2 citizens, 1 admin");
+  console.log("✅ Seed complete");
 }
 
 main()

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
+import Loader from "@/components/Loader"
 
 interface Budget {
   id: string
@@ -19,11 +20,16 @@ export default function CitizenBudgetsPage() {
   const { data: session } = useSession()
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [filterDept, setFilterDept] = useState("")
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
-    fetch("/api/budgets")
+    fetch("/api/citizen/budgets")
       .then((res) => res.json())
-      .then((data) => setBudgets(data))
+      .then((data) => {
+        setBudgets(data)
+        setLoading(false);
+      })
       .catch(console.error)
   }, [])
 
@@ -36,7 +42,8 @@ export default function CitizenBudgetsPage() {
     
   const filteredBudgets = filterDept ? budgets.filter((b) => b.department === filterDept) : budgets
   const departments = Array.from(new Set(budgets.map((b) => b.department)))
-
+  if(loading) return Loader();
+  
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-4">Budget Overview</h1>

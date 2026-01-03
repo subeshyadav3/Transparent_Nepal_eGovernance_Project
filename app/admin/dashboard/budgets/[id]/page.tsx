@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import Loader from "@/components/Loader"
 
 export default function BudgetDetailPage() {
   const { id } = useParams()
@@ -13,7 +14,7 @@ export default function BudgetDetailPage() {
   const [editAllocated, setEditAllocated] = useState<number>(0)
 
   useEffect(() => {
-    fetch(`/api/budgets/${id}`)
+    fetch(`/api/admin/budgets/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setBudget(data)
@@ -21,10 +22,10 @@ export default function BudgetDetailPage() {
       })
   }, [id])
 
-  if (!budget) return <p>Loading...</p>
+  if (!budget) return Loader();
 
   const handleUpdate = async () => {
-    await fetch(`/api/budgets/${id}`, {
+    await fetch(`/api/admin/budgets/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ allocatedAmount: editAllocated }),
