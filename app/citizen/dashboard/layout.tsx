@@ -4,6 +4,7 @@ import { useSession, signOut, signIn } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { User, LogOut, LayoutDashboard } from "lucide-react" // Added icons for better UI
 import type React from "react"
 
 export default function CitizenLayout({ children }: { children: React.ReactNode }) {
@@ -13,10 +14,10 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: "/" })
   }
-  // Helper for actions that require login
+
   const requireLogin = (action: () => void) => {
     if (!session) {
-      signIn() // prompts login
+      signIn()
     } else {
       action()
     }
@@ -37,7 +38,7 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-sky-600 text-white"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-sky-600 text-white shadow-lg"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
@@ -57,8 +58,8 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
       >
         {/* Logo Section */}
         <div className="p-6 border-b border-sky-200">
-          <h2 className="text-2xl font-bold text-sky-900">OpenBudget</h2>
-          <p className="text-xs text-sky-700 mt-1 font-semibold">CITIZEN PORTAL</p>
+          <h2 className="text-2xl font-bold text-sky-900 tracking-tight">OpenBudget</h2>
+          <p className="text-[10px] text-sky-700 mt-1 font-black uppercase tracking-widest">Citizen Portal</p>
         </div>
 
         {/* Navigation */}
@@ -77,7 +78,7 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
               <Button
                 key={item.href}
                 variant="ghost"
-                className="w-full justify-start hover:bg-sky-200 text-slate-700 hover:text-sky-900"
+                className="w-full justify-start hover:bg-sky-200 text-slate-700 hover:text-sky-900 font-medium transition-colors"
                 onClick={handleClick}
               >
                 {item.label}
@@ -86,35 +87,52 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
 
-        {/* User Section */}
-        {session ? (
-          <div className="p-4 border-t border-sky-200 space-y-3">
-            <div className="text-sm">
-              <p className="font-semibold text-slate-900">{session.user?.name}</p>
-              <p className="text-xs text-slate-600 truncate">{session.user?.email}</p>
+        {/* User & Profile Section */}
+        <div className="p-4 border-t border-sky-200 bg-sky-100/50">
+          {session ? (
+            <div className="space-y-3">
+              <div className="px-2">
+                <p className="text-sm font-bold text-slate-900 truncate">{session.user?.name}</p>
+                <p className="text-[10px] text-slate-500 truncate lowercase">{session.user?.email}</p>
+              </div>
+              
+              <div className="grid gap-2">
+                {/* PROFILE BUTTON - Added Here */}
+                <Link href="/citizen/dashboard/profile" onClick={() => setSidebarOpen(false)}>
+                  <Button variant="outline" className="w-full justify-start gap-2 border-sky-300 text-sky-900 hover:bg-white shadow-sm h-9 text-xs">
+                    <User size={14} />
+                    My Account & KYC
+                  </Button>
+                </Link>
+
+                <Button 
+                  onClick={handleLogout} 
+                  variant="destructive"
+                  className="w-full justify-start gap-2 h-9 text-xs font-bold"
+                >
+                  <LogOut size={14} />
+                  Sign Out
+                </Button>
+              </div>
             </div>
-            <Button onClick={handleLogout} className="w-full bg-sky-600 hover:bg-sky-700 text-white">
-              Sign Out
-            </Button>
-          </div>
-        ) : (
-          <div className="p-4 border-t border-sky-200">
+          ) : (
             <Button
               onClick={() => signIn()}
-              className="w-full bg-sky-600 hover:bg-sky-700 text-white"
+              className="w-full bg-sky-600 hover:bg-sky-700 text-white shadow-md font-bold"
             >
-              Sign In
+              Sign In to Access
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </aside>
 
+      {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 md:hidden z-30" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden z-30" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto w-full">{children}</main>
+      <main className="flex-1 overflow-auto w-full bg-white">{children}</main>
     </div>
   )
 }

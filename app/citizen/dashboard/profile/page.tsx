@@ -21,7 +21,7 @@ export default function ProfilePage() {
   const [kycForm, setKycForm] = useState({ citizenshipNumber: "", idPhotoUrl: "" });
 
   useEffect(() => {
-    fetch("/api/profile").then(res => res.json()).then(data => {
+    fetch("/api/citizen/profile").then(res => res.json()).then(data => {
       setProfile(data);
       setLoading(false);
     });
@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   const handleKycSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/profile", {
+    const res = await fetch("/api/citizen/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(kycForm),
