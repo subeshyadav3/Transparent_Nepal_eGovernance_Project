@@ -4,8 +4,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"  // Set to "postgresql"
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
+
+////////////////////
+/// USER & ROLE ///
+////////////////////
 
 model User {
   id          String   @id @default(uuid())
@@ -15,8 +20,9 @@ model User {
   role        Role     @default(CITIZEN)
   kycVerified Boolean  @default(false)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  complaints  Complaint[]
+
+  comments   Comment[]
+  complaints Complaint[]
 }
 
 enum Role {
@@ -24,48 +30,64 @@ enum Role {
   CITIZEN
 }
 
+////////////////////
+/// DEPARTMENT  ///
+////////////////////
+
 model Department {
   id          String   @id @default(uuid())
   name        String
   description String?
   fiscalYear  String
   createdAt   DateTime @default(now())
-  budgets     Budget[]
+
+  budgets Budget[]
 }
+
+////////////////////
+/// BUDGET      ///
+////////////////////
 
 model Budget {
   id              String   @id @default(uuid())
   departmentId    String
   fiscalYear      String
   allocatedAmount Decimal
-  spentAmount     Decimal @default(0)
-  remainingAmount Decimal @default(0)
+  spentAmount     Decimal  @default(0)
+  remainingAmount Decimal  @default(0)
   lastUpdated     DateTime @updatedAt
-  department      Department @relation(fields: [departmentId], references: [id])
-  projects        Project[]
-  transactions    BudgetTransaction[]
-}
 
-model Project {
-  id           String        @id @default(uuid())
-  budgetId     String
-  projectName  String
-  description  String
-  contractorId String
-  startDate    DateTime
-  endDate      DateTime
-  status       ProjectStatus @default(PLANNED)
-  progress     Int           @default(0)
-  totalCost    Decimal
-  upvotes      Int           @default(0)  // <-- new field
-  downvotes    Int           @default(0)  // <-- new field
-
-  budget       Budget        @relation(fields: [budgetId], references: [id])
-  contractor   Contractor    @relation(fields: [contractorId], references: [id])
-  complaints   Complaint[]
+  department   Department          @relation(fields: [departmentId], references: [id])
+  projects     Project[]
   transactions BudgetTransaction[]
 }
 
+////////////////////
+/// PROJECT     ///
+////////////////////
+
+model Project {
+  id           String        @id @default(cuid())
+  projectName  String
+  description  String
+  status       ProjectStatus
+  progress     Int
+  totalCost    Float
+  startDate    DateTime
+  endDate      DateTime
+  budgetId     String
+  budget       Budget        @relation(fields: [budgetId], references: [id])
+  contractorId String
+  contractor   Contractor    @relation(fields: [contractorId], references: [id])
+  upvotes      Int           @default(0)
+  downvotes    Int           @default(0)
+
+  projectReports     ProjectReport[]
+  rescheduleLogs     RescheduleLog[]
+  complaints         Complaint[]
+  comments           Comment[]
+  budgetTransactions BudgetTransaction[]
+}
 
 enum ProjectStatus {
   PLANNED
@@ -73,29 +95,52 @@ enum ProjectStatus {
   COMPLETED
 }
 
+////////////////////
+/// CONTRACTOR  ///
+////////////////////
+
 model Contractor {
-  id             String   @id @default(uuid())
+  id             String @id @default(uuid())
   companyName    String
   registrationNo String
   contactPerson  String
   phone          String
   email          String
-  projects       Project[]
-  score          Float?   // Contractor performance rating
+  score          Float?
+
+  projects Project[]
 }
 
+////////////////////
+/// COMMENTS   ///
+////////////////////
+
+model Comment {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+////////////////////
+/// COMPLAINTS ///
+////////////////////
+
 model Complaint {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   projectId   String
   userId      String
   title       String
   description String
   status      ComplaintStatus @default(SUBMITTED)
-  imageUrl    String?
-  videoUrl    String?
-  createdAt   DateTime @default(now())
-  project     Project  @relation(fields: [projectId], references: [id])
-  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime        @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 }
 
 enum ComplaintStatus {
@@ -106,6 +151,39 @@ enum ComplaintStatus {
   RESOLVED
 }
 
+////////////////////
+/// REPORTS     ///
+////////////////////
+
+model ProjectReport {
+  id        String   @id @default(uuid())
+  projectId String
+  title     String
+  summary   String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+////////////////////
+/// RESCHEDULE ///
+////////////////////
+
+model RescheduleLog {
+  id        String   @id @default(uuid())
+  projectId String
+  oldDate   DateTime
+  newDate   DateTime
+  reason    String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+////////////////////
+/// TRANSACTION ///
+////////////////////
+
 model BudgetTransaction {
   id              String   @id @default(uuid())
   budgetId        String
@@ -113,6 +191,8 @@ model BudgetTransaction {
   amount          Decimal
   transactionDate DateTime
   remarks         String?
-  budget          Budget   @relation(fields: [budgetId], references: [id])
-  project         Project? @relation(fields: [projectId], references: [id])
+  createdAt       DateTime @default(now())
+
+  budget  Budget   @relation(fields: [budgetId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
 }
