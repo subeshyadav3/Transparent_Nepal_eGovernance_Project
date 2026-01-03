@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import Loader from "@/components/Loader"
 
 interface Budget {
   id: string
@@ -22,31 +23,30 @@ export default function AdminBudgetsPage() {
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([])
   const [showForm, setShowForm] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState(false)
   const [newBudget, setNewBudget] = useState({ name: "", departmentId: "", allocated: "", year: new Date().getFullYear() })
 
   useEffect(() => {
-    fetch("/api/budgets")
-      .then((res) => res.json())
-      .then((data) => setBudgets(data))
+    Promise.all([
+      fetch("/api/budgets").then((res) => res.json()),
+      fetch("/api/departments").then((res) => res.json()),
+    ])
+      .then(([budgetsData, departmentsData]) => {
+        setBudgets(budgetsData)
+        setDepartments(departmentsData)
+      })
       .catch(console.error)
-  }, [])
-
-  useEffect(() => {
-    fetch("/api/departments")
-      .then((res) => res.json())
-      .then((data) => setDepartments(data))
+      .finally(() => setLoading(false))
   }, [])
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("en-NP", {
-      style: "currency",
-      currency: "NPR",
-      minimumFractionDigits: 0,
-    }).format(value || 0)
+    new Intl.NumberFormat("en-NP", { style: "currency", currency: "NPR", minimumFractionDigits: 0 }).format(value || 0)
 
   const handleAddBudget = async () => {
     if (!newBudget.name || !newBudget.departmentId || !newBudget.allocated) return
 
+    setActionLoading(true)
     const body = {
       departmentId: newBudget.departmentId,
       fiscalYear: `${newBudget.year}/${(newBudget.year + 1).toString().slice(-2)}`,
@@ -78,22 +78,23 @@ export default function AdminBudgetsPage() {
           status: "Active",
         },
       ])
-
       setShowForm(false)
       setNewBudget({ name: "", departmentId: "", allocated: "", year: new Date().getFullYear() })
     } catch (err) {
       console.error(err)
+    } finally {
+      setActionLoading(false)
     }
   }
 
   const handleUpdateBudget = async (budgetId: string, field: "status" | "spent", value: any) => {
     try {
-      const res = await fetch(`/api/budgets/${budgetId}`, {
+      await fetch(`/api/budgets?id=${budgetId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: value }),
+        body: JSON.stringify(field === "spent" ? { spentAmount: Number(value) } : { status: value }),
       })
-      if (!res.ok) throw new Error("Failed to update budget")
+  
       setBudgets((prev) =>
         prev.map((b) => (b.id === budgetId ? { ...b, [field]: field === "spent" ? Number(value) : value } : b))
       )
@@ -101,9 +102,13 @@ export default function AdminBudgetsPage() {
       console.error(err)
     }
   }
+  
+
+  if (loading) return <Loader />
 
   return (
-    <div className="p-8">
+    <div className="p-8 relative">
+      {actionLoading && <Loader />}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Budget Management (Admin)</h1>
         <Button onClick={() => setShowForm(!showForm)}>Add Budget</Button>
@@ -118,10 +123,7 @@ export default function AdminBudgetsPage() {
               value={newBudget.name}
               onChange={(e) => setNewBudget({ ...newBudget, name: e.target.value })}
             />
-            <select
-              value={newBudget.departmentId}
-              onChange={(e) => setNewBudget({ ...newBudget, departmentId: e.target.value })}
-            >
+            <select value={newBudget.departmentId} onChange={(e) => setNewBudget({ ...newBudget, departmentId: e.target.value })}>
               <option value="">Select Department</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
@@ -167,12 +169,12 @@ export default function AdminBudgetsPage() {
                   <td className="px-6 py-4">{budget.department}</td>
                   <td className="px-6 py-4">{formatCurrency(budget.allocated)}</td>
                   <td className="px-6 py-4">
-                    <Input
-                      type="number"
-                      value={budget.spent}
-                      onChange={(e) => handleUpdateBudget(budget.id, "spent", e.target.value)}
-                      className="w-24"
-                    />
+                  <Input
+  type="number"
+  defaultValue={budget.spent}  // use defaultValue instead of value
+  onBlur={(e) => handleUpdateBudget(budget.id, "spent", e.target.value)}
+  className="w-24"
+/>
                   </td>
                   <td className="px-6 py-4">
                     <select

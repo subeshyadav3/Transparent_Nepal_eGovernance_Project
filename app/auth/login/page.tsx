@@ -26,11 +26,19 @@ export default function LoginPage() {
         password,
         redirect: false,
       })
-      console.log(  "Login result:", result)
+
       if (result?.error) {
         setError(result.error)
       } else if (result?.ok) {
-        router.push("/citizen/dashboard")
+        // Fetch the session to get the role
+        const res = await fetch("/api/auth/session")
+        const sessionData = await res.json()
+
+        if (sessionData?.user?.role === "ADMIN") {
+          router.push("/admin/dashboard")
+        } else {
+          router.push("/citizen/dashboard")
+        }
       }
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.")
@@ -43,7 +51,6 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-center mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
@@ -54,14 +61,12 @@ export default function LoginPage() {
             <p className="text-center text-slate-600 text-sm">Sign in to OpenBudget Platform</p>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
               <p className="font-medium">{error}</p>
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
@@ -71,7 +76,6 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
 
@@ -83,7 +87,6 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
 
@@ -96,7 +99,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-300"></div>
@@ -106,7 +108,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Footer */}
           <p className="text-center text-slate-600 text-sm">
             Don't have an account?{" "}
             <Link href="/auth/signup" className="text-blue-600 font-semibold hover:text-blue-700 transition">
@@ -114,17 +115,13 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          {/* Demo Info */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-700">
-              <span className="font-semibold">Demo Credentials:</span>
-            </p>
+            <p className="text-xs text-blue-700 font-semibold">Demo Credentials:</p>
             <p className="text-xs text-blue-700 mt-1">Citizen: test@example.com / password123</p>
             <p className="text-xs text-blue-700">Official: admin@example.com / password123</p>
           </div>
         </div>
 
-        {/* Footer Text */}
         <p className="text-center text-slate-600 text-xs mt-6">Secure login powered by OpenBudget Platform</p>
       </div>
     </div>

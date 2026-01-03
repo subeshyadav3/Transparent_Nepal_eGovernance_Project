@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import prisma from "@/lib/prisma" // make sure you export prisma client from lib/prisma.ts
+import prisma from "@/lib/prisma"
 
 // GET: fetch all budgets
 export async function GET(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       allocated: b.allocatedAmount,
       spent: b.spentAmount,
       year: parseInt(b.fiscalYear.split("/")[0]), // assuming fiscalYear is "2082/83"
-      status: "Active" as "Active" | "Planning" | "Closed", // you can adjust based on logic
+      status: "Active" as "Active" | "Planning" | "Closed", // adjust if needed
     }))
 
     return NextResponse.json(formatted)
@@ -38,6 +38,29 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(budget)
+  } catch (err) {
+    console.error(err)
+    return NextResponse.error()
+  }
+}
+
+// PATCH: update budget fields (spent or status)
+export async function PATCH(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const budgetId = searchParams.get("id")
+    if (!budgetId) return NextResponse.json({ error: "Missing budget ID" }, { status: 400 })
+
+    const body = await req.json()
+    const updatedBudget = await prisma.budget.update({
+      where: { id: budgetId },
+      data: {
+        ...(body.spentAmount !== undefined ? { spentAmount: body.spentAmount } : {}),
+        ...(body.status ? { status: body.status } : {}),
+      },
+    })
+
+    return NextResponse.json(updatedBudget)
   } catch (err) {
     console.error(err)
     return NextResponse.error()
