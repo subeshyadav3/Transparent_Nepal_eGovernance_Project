@@ -94,7 +94,7 @@ export default function AdminBudgetsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(field === "spent" ? { spentAmount: Number(value) } : { status: value }),
       })
-  
+
       setBudgets((prev) =>
         prev.map((b) => (b.id === budgetId ? { ...b, [field]: field === "spent" ? Number(value) : value } : b))
       )
@@ -102,7 +102,7 @@ export default function AdminBudgetsPage() {
       console.error(err)
     }
   }
-  
+
 
   if (loading) return <Loader />
 
@@ -165,16 +165,17 @@ export default function AdminBudgetsPage() {
             <tbody>
               {budgets.map((budget) => (
                 <tr key={budget.id} className="border-b hover:bg-muted/30 cursor-pointer">
-                  <td className="px-6 py-4" onClick={() => router.push(`/admin/budgets/${budget.id}`)}>{budget.name}</td>
+                  {/* <td className="px-6 py-4" onClick={() => router.push(`/admin/budgets/${budget.id}`)}>{budget.name}</td> */}
+                  <td className="px-6 py-4">{budget.name}</td>
                   <td className="px-6 py-4">{budget.department}</td>
                   <td className="px-6 py-4">{formatCurrency(budget.allocated)}</td>
                   <td className="px-6 py-4">
-                  <Input
-  type="number"
-  defaultValue={budget.spent}  // use defaultValue instead of value
-  onBlur={(e) => handleUpdateBudget(budget.id, "spent", e.target.value)}
-  className="w-24"
-/>
+                    <Input
+                      type="number"
+                      defaultValue={budget.spent}  // use defaultValue instead of value
+                      onBlur={(e) => handleUpdateBudget(budget.id, "spent", e.target.value)}
+                      className="w-24"
+                    />
                   </td>
                   <td className="px-6 py-4">
                     <select

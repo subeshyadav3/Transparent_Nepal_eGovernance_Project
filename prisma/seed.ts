@@ -1,7 +1,12 @@
-import { PrismaClient, ProjectStatus, ComplaintStatus, Role } from "../app/generated/prisma/client";
-import { PrismaPg } from '@prisma/adapter-pg';
-import 'dotenv/config';
-import bcrypt from 'bcryptjs';
+import {
+  PrismaClient,
+  ProjectStatus,
+  ComplaintStatus,
+  Role,
+} from "../app/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
+import bcrypt from "bcryptjs";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -11,128 +16,213 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Seeding database...");
-  
-  // Clear existing data
-  // await prisma.complaint.deleteMany();
-  // await prisma.project.deleteMany();
-  // await prisma.budgetTransaction.deleteMany();
-  // await prisma.budget.deleteMany();
-  // await prisma.department.deleteMany();
-  // await prisma.contractor.deleteMany();
-  // await prisma.user.deleteMany();
 
-  // --- Admin ---
+  // --- USERS ---
   const admin = await prisma.user.create({
-    data: { 
-      name: "Admin User", 
-      email: "admin@gmail.com", 
-      password: await bcrypt.hash("admin123", 10), 
-      role: Role.ADMIN, 
-      kycVerified: true 
+    data: {
+      name: "Admin User",
+      email: "admin@gmail.com",
+      password: await bcrypt.hash("admin123", 10),
+      role: Role.ADMIN,
+      kycVerified: true,
     },
   });
 
-  // --- Citizens ---
-  const citizens = [];
-  for (let i = 1; i <= 20; i++) {
-    citizens.push(await prisma.user.create({
-      data: {
-        name: `Citizen ${i}`,
-        email: `citizen${i}@example.com`,
-        password: await bcrypt.hash(`citizen${i}123`, 10),
-        role: Role.CITIZEN,
-        kycVerified: i % 2 === 0,
-      },
-    }));
-  }
+  const citizen1 = await prisma.user.create({
+    data: {
+      name: "Ram Sharma",
+      email: "ram@gmail.com",
+      password: await bcrypt.hash("ram123", 10),
+      role: Role.CITIZEN,
+      kycVerified: true,
+    },
+  });
 
-  // --- Departments ---
+  const citizen2 = await prisma.user.create({
+    data: {
+      name: "Sita Karki",
+      email: "sita@gmail.com",
+      password: await bcrypt.hash("sita123", 10),
+      role: Role.CITIZEN,
+      kycVerified: false,
+    },
+  });
+
+  // --- DEPARTMENTS ---
   const deptData = [
     { name: "Public Works", description: "Infrastructure", fiscalYear: "2082/83" },
     { name: "Health", description: "Hospitals", fiscalYear: "2082/83" },
     { name: "Education", description: "Schools", fiscalYear: "2082/83" },
     { name: "Environment", description: "Forests and Parks", fiscalYear: "2082/83" },
   ];
-  const departments = [];
-  for (const d of deptData) departments.push(await prisma.department.create({ data: d }));
 
-  // --- Budgets (NPR) ---
+  const departments = [];
+  for (const d of deptData) {
+    departments.push(await prisma.department.create({ data: d }));
+  }
+
+  // --- BUDGETS ---
   const budgets = [];
   for (const dept of departments) {
-    budgets.push(await prisma.budget.create({
-      data: {
-        departmentId: dept.id,
-        fiscalYear: dept.fiscalYear,
-        allocatedAmount: 1_00_00_000 + Math.floor(Math.random() * 50_00_000), // NPR
-        spentAmount: Math.floor(Math.random() * 50_00_000),
-        remainingAmount: Math.floor(Math.random() * 50_00_000),
-      },
-    }));
-  }
-
-  // --- Contractors ---
-  const contractorData = [
-    { companyName: "Road Builders Ltd", registrationNo: "RB001", contactPerson: "Mr. Sharma", phone: "9812345670", email: "rb@builders.com", score: 4.5 },
-    { companyName: "Health Solutions Pvt", registrationNo: "HS002", contactPerson: "Ms. Karki", phone: "9809876543", email: "hs@solutions.com", score: 4.2 },
-    { companyName: "Edu Construct", registrationNo: "EC003", contactPerson: "Mr. Joshi", phone: "9811122233", email: "edu@construct.com", score: 4.0 },
-    { companyName: "Green Parks Ltd", registrationNo: "GP004", contactPerson: "Ms. Shrestha", phone: "9809988776", email: "green@parks.com", score: 4.7 },
-  ];
-  const contractors = [];
-  for (const c of contractorData) contractors.push(await prisma.contractor.create({ data: c }));
-
-  // --- Projects ---
-  const projectStatuses = [ProjectStatus.PLANNED, ProjectStatus.ONGOING, ProjectStatus.COMPLETED];
-  const projects = [];
-  for (let i = 0; i < 15; i++) {
-    projects.push(await prisma.project.create({
-      data: {
-        budgetId: budgets[i % budgets.length].id,
-        projectName: `Project ${i + 1}`,
-        description: `Detailed description of project ${i + 1}`,
-        contractorId: contractors[i % contractors.length].id,
-        startDate: new Date(2025, i % 12, 1),
-        endDate: new Date(2025, (i % 12) + 2, 28),
-        status: projectStatuses[i % projectStatuses.length],
-        progress: Math.floor(Math.random() * 101),
-        totalCost: 5_00_00_000 + Math.floor(Math.random() * 50_00_000), // NPR
-        upvotes: Math.floor(Math.random() * 300),
-        downvotes: Math.floor(Math.random() * 100),
-      },
-    }));
-  }
-
-  // --- Budget Transactions ---
-  for (const budget of budgets) {
-    for (let i = 0; i < 3; i++) {
-      await prisma.budgetTransaction.create({
+    budgets.push(
+      await prisma.budget.create({
         data: {
-          budgetId: budget.id,
-          projectId: projects[i % projects.length].id,
-          amount: Math.floor(Math.random() * 5_00_000), // NPR
-          transactionDate: new Date(2025, i, 15),
-          remarks: `Transaction ${i + 1} for ${budget.departmentId}`,
+          departmentId: dept.id,
+          fiscalYear: dept.fiscalYear,
+          allocatedAmount: 100_000_000 + Math.floor(Math.random() * 50_000_000),
+          spentAmount: Math.floor(Math.random() * 50_000_000),
+          remainingAmount: Math.floor(Math.random() * 50_000_000),
         },
-      });
-    }
+      })
+    );
   }
 
-  // --- Complaints ---
-  const complaintStatuses = [ComplaintStatus.SUBMITTED, ComplaintStatus.UNDER_REVIEW, ComplaintStatus.VERIFIED, ComplaintStatus.RESOLVED];
-  for (let i = 0; i < 10; i++) {
-    await prisma.complaint.create({
-      data: {
-        projectId: projects[i % 7].id,
-        userId: citizens[i % citizens.length].id,
-        title: `Complaint ${i + 1}`,
-        description: `Details of complaint ${i + 1}`,
-        status: complaintStatuses[i % complaintStatuses.length],
-      },
-    });
-  }
+  // --- CONTRACTORS ---
+  const contractor1 = await prisma.contractor.create({
+    data: {
+      companyName: "Himalayan Infrastructure Pvt. Ltd.",
+      registrationNo: "HIPL-2075",
+      contactPerson: "Bikram Thapa",
+      phone: "9841122334",
+      email: "info@himalayaninfra.com",
+      score: 4.6,
+    },
+  });
 
-  console.log("Database seeded successfully with NPR amounts!");
+  const contractor2 = await prisma.contractor.create({
+    data: {
+      companyName: "Green Valley Builders",
+      registrationNo: "GVB-2078",
+      contactPerson: "Anita Shrestha",
+      phone: "9803344556",
+      email: "contact@greenvalley.com",
+      score: 4.3,
+    },
+  });
+
+  // --- PROJECTS (5 REAL PROJECTS) ---
+  const project1 = await prisma.project.create({
+    data: {
+      budgetId: budgets[0].id,
+      projectName: "Kathmandu Ring Road Expansion",
+      description: "Widening of ring road to reduce traffic congestion",
+      contractorId: contractor1.id,
+      startDate: new Date("2024-01-15"),
+      endDate: new Date("2025-12-30"),
+      status: ProjectStatus.ONGOING,
+      progress: 55,
+      totalCost: 80_000_000,
+    },
+  });
+
+  const project2 = await prisma.project.create({
+    data: {
+      budgetId: budgets[0].id,
+      projectName: "Bagmati River Bridge Construction",
+      description: "New four-lane bridge over Bagmati River",
+      contractorId: contractor1.id,
+      startDate: new Date("2023-06-01"),
+      endDate: new Date("2024-10-20"),
+      status: ProjectStatus.COMPLETED,
+      progress: 100,
+      totalCost: 45_000_000,
+      upvotes: 32,
+      downvotes: 5,
+    },
+  });
+
+  const project3 = await prisma.project.create({
+    data: {
+      budgetId: budgets[1].id,
+      projectName: "Hospital Renovation Project",
+      description: "Upgrading hospital facilities and equipment",
+      contractorId: contractor2.id,
+      startDate: new Date("2024-03-01"),
+      endDate: new Date("2025-08-30"),
+      status: ProjectStatus.ONGOING,
+      progress: 40,
+      totalCost: 30_000_000,
+    },
+  });
+
+  const project4 = await prisma.project.create({
+    data: {
+      budgetId: budgets[2].id,
+      projectName: "School Building Construction",
+      description: "Construction of new school building in rural area",
+      contractorId: contractor2.id,
+      startDate: new Date("2024-05-10"),
+      endDate: new Date("2024-12-15"),
+      status: ProjectStatus.PLANNED,
+      progress: 0,
+      totalCost: 15_000_000,
+    },
+  });
+
+  const project5 = await prisma.project.create({
+    data: {
+      budgetId: budgets[3].id,
+      projectName: "Community Park Renovation",
+      description: "Renovation of public park with green spaces",
+      contractorId: contractor2.id,
+      startDate: new Date("2023-02-01"),
+      endDate: new Date("2023-11-30"),
+      status: ProjectStatus.COMPLETED,
+      progress: 100,
+      totalCost: 10_000_000,
+      upvotes: 48,
+      downvotes: 2,
+    },
+  });
+
+  // --- PROJECT REPORT ---
+  await prisma.projectReport.create({
+    data: {
+      projectId: project1.id,
+      title: "Q2 Progress Report",
+      summary: "Road widening completed up to Kalanki section",
+    },
+  });
+
+  // --- RESCHEDULE LOG ---
+  await prisma.rescheduleLog.create({
+    data: {
+      projectId: project1.id,
+      oldDate: new Date("2025-09-30"),
+      newDate: new Date("2025-12-30"),
+      reason: "Monsoon delay",
+    },
+  });
+
+  // --- COMPLAINTS (CITIZEN ONLY) ---
+  await prisma.complaint.create({
+    data: {
+      projectId: project2.id,
+      userId: citizen1.id,
+      title: "Cracks on bridge surface",
+      description: "Small cracks noticed near the footpath area",
+      status: ComplaintStatus.UNDER_REVIEW,
+    },
+  });
+
+  await prisma.complaint.create({
+    data: {
+      projectId: project5.id,
+      userId: citizen2.id,
+      title: "Poor quality benches",
+      description: "Wooden benches damaged after few months",
+      status: ComplaintStatus.SUBMITTED,
+    },
+  });
+
+  console.log("✅ Database seeded successfully with 4 departments, budgets, 5 projects, 2 citizens, 1 admin");
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

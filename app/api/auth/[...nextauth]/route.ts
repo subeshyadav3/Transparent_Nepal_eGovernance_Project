@@ -1,11 +1,35 @@
-// app/api/auth/[...nextauth]/route.ts
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
-export const authOptions = {
+// --- Extend default types for NextAuth ---
+import { DefaultSession, DefaultUser } from "next-auth";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      role: "ADMIN" | "CITIZEN";
+      kycVerified: boolean;
+    } & DefaultSession["user"];
+  }
+
+  interface User extends DefaultUser {
+    id: string;
+    role: "ADMIN" | "CITIZEN";
+    kycVerified: boolean;
+  }
+
+  interface JWT {
+    role: "ADMIN" | "CITIZEN";
+    kycVerified: boolean;
+  }
+}
+
+// --- NextAuth options ---
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -28,28 +52,26 @@ export const authOptions = {
         );
         if (!validPassword) return null;
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          kycVerified: user.kycVerified,
-        };
+        return user; // return full user object
       },
     }),
   ],
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
+      // jwt callback
       if (user) {
-        token.role = user.role;
+        token.role = user.role as "ADMIN" | "CITIZEN";
         token.kycVerified = user.kycVerified;
       }
+
       return token;
     },
     async session({ session, token }) {
+      // session callback
       if (session.user) {
-        session.user.role = token.role;
+        session.user.id = token.sub as string;
+        session.user.role = token.role as "ADMIN" | "CITIZEN";
         session.user.kycVerified = token.kycVerified;
       }
       return session;
