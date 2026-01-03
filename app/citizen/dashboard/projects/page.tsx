@@ -8,7 +8,7 @@ export default function ProjectsCitizen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/projects/citizen")
+    fetch("/api/citizen/projects")
       .then((res) => res.json())
       .then((data) => {
         setProjects(data);

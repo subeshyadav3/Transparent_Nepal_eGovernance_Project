@@ -18,7 +18,10 @@ model User {
   email       String   @unique
   password    String
   role        Role     @default(CITIZEN)
-  kycVerified Boolean  @default(false)
+  kycVerified       Boolean     @default(false)
+  citizenshipNumber String?     @unique
+  idPhotoUrl        String?
+  
   createdAt   DateTime @default(now())
 
   comments   Comment[]
