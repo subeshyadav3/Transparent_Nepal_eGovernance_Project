@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"  // Set to "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(CITIZEN)
+  kycVerified Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  complaints  Complaint[]
+}
+
+enum Role {
+  ADMIN
+  CITIZEN
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  fiscalYear  String
+  createdAt   DateTime @default(now())
+  budgets     Budget[]
+}
+
+model Budget {
+  id              String   @id @default(uuid())
+  departmentId    String
+  fiscalYear      String
+  allocatedAmount Decimal
+  spentAmount     Decimal @default(0)
+  remainingAmount Decimal @default(0)
+  lastUpdated     DateTime @updatedAt
+  department      Department @relation(fields: [departmentId], references: [id])
+  projects        Project[]
+  transactions    BudgetTransaction[]
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  budgetId     String
+  projectName  String
+  description  String
+  contractorId String
+  startDate    DateTime
+  endDate      DateTime
+  status       ProjectStatus @default(PLANNED)
+  progress     Int           @default(0)
+  totalCost    Decimal
+  upvotes      Int           @default(0)  // <-- new field
+  downvotes    Int           @default(0)  // <-- new field
+
+  budget       Budget        @relation(fields: [budgetId], references: [id])
+  contractor   Contractor    @relation(fields: [contractorId], references: [id])
+  complaints   Complaint[]
+  transactions BudgetTransaction[]
+}
+
+
+enum ProjectStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+}
+
+model Contractor {
+  id             String   @id @default(uuid())
+  companyName    String
+  registrationNo String
+  contactPerson  String
+  phone          String
+  email          String
+  projects       Project[]
+  score          Float?   // Contractor performance rating
+}
+
+model Complaint {
+  id          String   @id @default(uuid())
+  projectId   String
+  userId      String
+  title       String
+  description String
+  status      ComplaintStatus @default(SUBMITTED)
+  imageUrl    String?
+  videoUrl    String?
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+enum ComplaintStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  RESOLVED
+}
+
+model BudgetTransaction {
+  id              String   @id @default(uuid())
+  budgetId        String
+  projectId       String?
+  amount          Decimal
+  transactionDate DateTime
+  remarks         String?
+  budget          Budget   @relation(fields: [budgetId], references: [id])
+  project         Project? @relation(fields: [projectId], references: [id])
+}
