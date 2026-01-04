@@ -64,7 +64,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(projectsWithCounts);
 }
 
-// ---------------- POST /api/projects/citizen ----------------
 export async function POST(req: NextRequest) {
   const session = (await getServerSession(authOptions)) as Session | null;
 
@@ -87,14 +86,23 @@ export async function POST(req: NextRequest) {
     case "comment":
       if (!message) return NextResponse.json({ error: "Message required" }, { status: 400 });
       const comment = await prisma.comment.create({
-        data: { projectId, message, userId: session?.user.id },
+        data: { 
+          projectId, 
+          message, 
+          userId: session!.user.id 
+        },
       });
       return NextResponse.json(comment);
 
     case "complaint":
       if (!title) return NextResponse.json({ error: "Title required" }, { status: 400 });
       const complaint = await prisma.complaint.create({
-        data: { projectId, title, description: description ?? "", userId: session?.user.id },
+        data: { 
+          projectId, 
+          title, 
+          description: description ?? "", 
+          userId: session!.user.id 
+        },
       });
       return NextResponse.json(complaint);
 
