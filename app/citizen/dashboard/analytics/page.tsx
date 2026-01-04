@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { getRealAnalytics } from "@/app/api/common/analytics/route"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AnalyticsPage() {
@@ -12,9 +11,20 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     async function loadData() {
-      const result = await getRealAnalytics();
-      setData(result);
-      setLoading(false);
+      try {
+        setLoading(true);
+        // 2. Fetch from your api
+        const response = await fetch('/api/common/analytics');
+        const result = await response.json();
+        
+        if (result.error) throw new Error(result.error);
+        
+        setData(result);
+      } catch (err) {
+        console.error("Failed to load analytics:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
