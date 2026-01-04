@@ -70,7 +70,7 @@ export default function SignupPage() {
               <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
               <Input
                 type="text"
-                placeholder="John Doe"
+                placeholder="Rajesh Hamal"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required

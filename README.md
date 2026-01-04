@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OpenBudget Nepal 🇳🇵
 
-## Getting Started
+**OpenBudget Nepal** is a transparent e-governance platform developed for the **Digital Nepal Framework Initiative**. It serves as a central hub for tracking federal budgets, provincial spending, and national infrastructure projects, ensuring accountability through the Open Data Initiative.
 
-First, run the development server:
 
+
+## 🏗️ Project Vision
+Our goal is to ensure a prosperous Nepal through digital transparency. Every taxpayer has the right to know where their money is being spent—from National Pride Projects to local community park renovations.
+
+## 🚀 Core Features
+
+### 🏛️ Admin & Public Official Portal
+* **Budget Entry:** Simplified tools for departmental budget allocation.
+* **KYC Verification:** Secure queue for reviewing and approving citizen identity documents.
+* **Project Management:** Real-time progress updates for infrastructure projects.
+* **Contractor Tracking:** Performance scoring and registration management for vendors.
+
+### 👥 Citizen Portal
+* **Live Budget Tracking:** Real-time data across all 7 Provinces and 753 Local Levels.
+* **Public Grievance:** Integrated complaint system (Hello Sarkar style) with status tracking.
+* **Project Analytics:** Data-driven insights into spending patterns and fiscal efficiency.
+* **Verified Profile:** Secure KYC-backed accounts for official interactions.
+
+## 🛠️ Technical Stack
+
+* **Frontend:** Next.js (App Router)
+* **Backend:** Prisma ORM & Next.js API Routes
+* **Database:** PostgreSQL (Neon Serverless)
+* **Authentication:** NextAuth.js
+* **UI/UX:** Tailwind CSS, Shadcn/UI, Lucide Icons
+
+
+
+## 📋 Installation & Setup
+
+### 1. Clone & Install
 ```bash
+git clone [https://github.com/your-username/e-governance.git](https://github.com/your-username/e-governance.git)
+cd e-governance
+npm install
+
+# Generate the Prisma Client
+npx prisma generate
+
+# Apply migrations to update your Database schema
+npx prisma migrate dev --name init
+
+# Push seed data (Departments, Projects, Admin Users)
+npx prisma db seed
+
+Run:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
