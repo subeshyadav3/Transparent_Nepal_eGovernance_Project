@@ -2,25 +2,19 @@
 
 import { useSession, signOut, signIn } from "next-auth/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation" // Added this
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { User, LogOut, LayoutDashboard } from "lucide-react" // Added icons for better UI
+import { User, LogOut, LayoutDashboard } from "lucide-react"
 import type React from "react"
 
 export default function CitizenLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
+  const pathname = usePathname() // Initialize pathname
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: "/" })
-  }
-
-  const requireLogin = (action: () => void) => {
-    if (!session) {
-      signIn()
-    } else {
-      action()
-    }
   }
 
   const navItems = [
@@ -65,24 +59,22 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const handleClick = () => {
-              if (item.requiresLogin) {
-                requireLogin(() => (window.location.href = item.href))
-              } else {
-                window.location.href = item.href
-              }
-              setSidebarOpen(false)
-            }
+            // Check if active
+            const isActive = pathname === item.href;
 
             return (
-              <Button
-                key={item.href}
-                variant="ghost"
-                className="w-full justify-start hover:bg-sky-200 text-slate-700 hover:text-sky-900 font-medium transition-colors"
-                onClick={handleClick}
-              >
-                {item.label}
-              </Button>
+              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  className={`w-full justify-start transition-colors mb-1 ${
+                    isActive 
+                      ? "bg-sky-200 text-sky-900 font-bold border-r-4 border-sky-600 shadow-sm" 
+                      : "hover:bg-sky-200 text-slate-700 hover:text-sky-900 font-medium"
+                  }`}
+                >
+                  {item.label}
+                </Button>
+              </Link>
             )
           })}
         </nav>
@@ -97,9 +89,13 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
               </div>
               
               <div className="grid gap-2">
-                {/* PROFILE BUTTON - Added Here */}
                 <Link href="/citizen/dashboard/profile" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="outline" className="w-full justify-start gap-2 border-sky-300 text-sky-900 hover:bg-white shadow-sm h-9 text-xs">
+                  <Button 
+                    variant={pathname === "/citizen/dashboard/profile" ? "secondary" : "outline"} 
+                    className={`w-full justify-start gap-2 border-sky-300 text-sky-900 hover:bg-white shadow-sm h-9 text-xs ${
+                      pathname === "/citizen/dashboard/profile" ? "bg-sky-200 border-sky-600 border-r-4" : ""
+                    }`}
+                  >
                     <User size={14} />
                     My Account & KYC
                   </Button>

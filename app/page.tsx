@@ -48,7 +48,7 @@ export default function Home() {
               <span className="text-[#1c3f94] font-bold text-xs text-center leading-tight">नेपाल<br />सरकार</span>
             </div>
             <div>
-              <span className="font-bold text-xl tracking-tight block uppercase">Sushasan</span>
+              <span className="font-bold text-xl tracking-tight block uppercase">Transparent Nepal</span>
               <span className="text-[10px] uppercase tracking-widest block opacity-80 font-semibold">Government of Nepal</span>
             </div>
           </div>

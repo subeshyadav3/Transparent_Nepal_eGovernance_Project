@@ -16,7 +16,8 @@ import {
   TrendingUp, 
   Calendar,
   Upload,
-  CheckCircle2
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react";
 
 const STATUS_OPTIONS = ["PLANNED", "ONGOING", "COMPLETED"];
@@ -33,7 +34,7 @@ export default function ProjectDetailsAdmin() {
   const [newReportFile, setNewReportFile] = useState<File | null>(null);
 
   useEffect(() => {
-    fetch(`/api/admin/projects/admin?id=${params.id}`)
+    fetch(`/api/admin/projects?id=${params.id}`)
       .then((res) => res.json())
       .then((data) => {
         setProject(data);
@@ -49,13 +50,13 @@ export default function ProjectDetailsAdmin() {
     if (rescheduleDate && (project.rescheduleLogs?.length ?? 0) < 2) {
       body.endDate = rescheduleDate;
     }
-    await fetch(`/api/admin/projects/admin?id=${project.id}`, {
+    await fetch(`/api/admin/projects?id=${project.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     
-    const res = await fetch(`/api/admin/projects/admin?id=${project.id}`);
+    const res = await fetch(`/api/admin/projects?id=${project.id}`);
     const updated = await res.json();
     setProject(updated);
     setEditing(false);
@@ -153,11 +154,24 @@ export default function ProjectDetailsAdmin() {
               </div>
             ) : (
               <div className="space-y-8 relative z-10">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {/* Stats Grid with Votes */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                   <DetailItem label="Status" value={project.status} color="text-blue-900" />
                   <DetailItem label="Progress" value={`${project.progress}%`} />
                   <DetailItem label="Budget" value={`₹${project.totalCost?.toLocaleString()}`} />
                   <DetailItem label="Contractor" value={project.contractor?.companyName} />
+                  
+                  {/* Upvotes */}
+                  <div className="flex items-center gap-2">
+                    <ThumbsUp size={16} className="text-emerald-600" />
+                    <DetailItem label="Upvotes" value={project.upvotes?.toString() || "0"} color="text-emerald-600" />
+                  </div>
+                  
+                  {/* Downvotes */}
+                  <div className="flex items-center gap-2">
+                    <ThumbsDown size={16} className="text-rose-600" />
+                    <DetailItem label="Downvotes" value={project.downvotes?.toString() || "0"} color="text-rose-600" />
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -256,7 +270,7 @@ export default function ProjectDetailsAdmin() {
                     <span className="text-[9px] font-black bg-red-100 text-red-700 px-2 py-0.5 rounded uppercase">{c.status}</span>
                   </div>
                   <p className="text-[10px] text-slate-500 font-bold uppercase mb-2">Filed by: {c.user?.name}</p>
-                  <Button variant="outline" size="xs" className="h-7 text-[10px] font-black uppercase border-red-200 text-red-700 hover:bg-red-700 hover:text-white w-full">Take Action</Button>
+                  <Button variant="outline" size="sm" className="h-7 text-[10px] font-black uppercase border-red-200 text-red-700 hover:bg-red-700 hover:text-white w-full">Take Action</Button>
                 </div>
               ))}
             </div>
