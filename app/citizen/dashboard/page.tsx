@@ -3,6 +3,7 @@
 import { useSession, signIn } from "next-auth/react"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { 
   Wallet, 
   Construction, 
@@ -10,12 +11,40 @@ import {
   Users, 
   Newspaper, 
   BarChart3,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from "lucide-react"
 
 export default function CitizenDashboardPage() {
   const { data: session } = useSession()
   const router = useRouter()
+  
+
+  const [stats, setStats] = useState({
+    activeProjects: 0,
+    totalBudget: 0,
+    resolutionRate: 0,
+    loading: true
+  })
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/citizen/stats') 
+        const data = await res.json()
+        setStats({
+          activeProjects: data.activeProjects,
+          totalBudget: data.totalBudget,
+          resolutionRate: data.resolutionRate,
+          loading: false
+        })
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats", error)
+        setStats(prev => ({ ...prev, loading: false }))
+      }
+    }
+    fetchStats()
+  }, [])
 
   const requireLogin = (href: string, requiresAuth: boolean) => {
     if (requiresAuth && !session) {
@@ -81,7 +110,7 @@ export default function CitizenDashboardPage() {
       {/* Welcome Header */}
       <div className="max-w-6xl mx-auto mb-10">
         <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">
-          Citizen Command Center
+          Transparent Nepal Command Center
         </h1>
         <p className="text-slate-500 font-medium text-sm mt-1">
           {session 
@@ -90,19 +119,27 @@ export default function CitizenDashboardPage() {
         </p>
       </div>
 
-      {/* Stats Quick-View (Placeholder for real data) */}
+      {/* Stats Quick-View with Live Data */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Active Projects</p>
-          <p className="text-2xl font-black text-blue-900">24</p>
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Active Projects</p>
+          {stats.loading ? <Loader2 className="animate-spin text-blue-900" size={20}/> : (
+            <p className="text-3xl font-black text-blue-900">{stats.activeProjects}</p>
+          )}
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Total Budget (FY)</p>
-          <p className="text-2xl font-black text-emerald-700">$4.2M</p>
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Budget Invested</p>
+          {stats.loading ? <Loader2 className="animate-spin text-emerald-700" size={20}/> : (
+            <p className="text-3xl font-black text-emerald-700">
+              रू {(stats.totalBudget / 10000000).toFixed(2)} Cr
+            </p>
+          )}
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Resolved Issues</p>
-          <p className="text-2xl font-black text-orange-600">89%</p>
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Complaint Resolution</p>
+          {stats.loading ? <Loader2 className="animate-spin text-orange-600" size={20}/> : (
+            <p className="text-3xl font-black text-orange-600">{stats.resolutionRate}%</p>
+          )}
         </div>
       </div>
 
@@ -114,6 +151,7 @@ export default function CitizenDashboardPage() {
             onClick={() => requireLogin(item.href, item.auth)}
             className={`group p-6 hover:shadow-xl transition-all cursor-pointer border-l-4 ${item.color} bg-white relative overflow-hidden`}
           >
+            {/* Card Content remains the same... */}
             <div className="flex flex-col h-full justify-between">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-2 bg-slate-50 rounded-lg group-hover:scale-110 transition-transform">

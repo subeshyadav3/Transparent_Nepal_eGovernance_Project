@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -39,17 +41,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f0f4f8]">
-
+      {/* Navigation Header */}
       <div className="sticky top-0 z-50 bg-[#1c3f94] text-white border-b border-blue-800 shadow-md">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-inner overflow-hidden p-1">
-            
               <span className="text-[#1c3f94] font-bold text-xs text-center leading-tight">नेपाल<br />सरकार</span>
             </div>
             <div>
               <span className="font-bold text-xl tracking-tight block uppercase">Transparent Nepal</span>
-              <span className="text-[10px] uppercase tracking-widest block opacity-80 font-semibold">Government of Nepal</span>
+              <span className="text-[10px] uppercase tracking-widest block opacity-80 font-semibold tracking-tighter">Pardarshi Nepal initiative</span>
             </div>
           </div>
           <div className="flex gap-3">
@@ -79,17 +80,21 @@ export default function Home() {
 
             <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
               Access real-time data on government spending, federal budgets, and provincial projects.
-              Ensuring accountability through the <strong>Sushasan</strong> Open Data Initiative.
+              Ensuring accountability through the <strong>Transparent Nepal</strong> Open Data Initiative.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" className="bg-[#1c3f94] hover:bg-[#152e6d] gap-2 px-8 font-bold">
-                Explore Budgets
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" className="border-[#1c3f94] text-[#1c3f94] hover:bg-blue-50 px-8 font-bold">
-                View Projects
-              </Button>
+              <Link href="/auth/login">
+                <Button size="lg" className="bg-[#1c3f94] hover:bg-[#152e6d] gap-2 px-8 font-bold">
+                  Explore Budgets
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/auth/login">
+                <Button size="lg" variant="outline" className="border-[#1c3f94] text-[#1c3f94] hover:bg-blue-50 px-8 font-bold">
+                  View Projects
+                </Button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-3 gap-4 md:gap-8 pt-8 border-t border-blue-200">
@@ -119,7 +124,9 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-[#1a2b4b] mb-3 uppercase tracking-tighter">Public Officials</h3>
                 <p className="text-slate-600 mb-6">Internal dashboard for budget entry, procurement management, and departmental reporting.</p>
-                <Button className="w-full bg-[#1c3f94] hover:bg-[#152e6d] font-bold">Officer Login</Button>
+                <Link href="/auth/login">
+                   <Button className="w-full bg-[#1c3f94] hover:bg-[#152e6d] font-bold">Officer Login</Button>
+                </Link>
               </div>
             </Card>
 
@@ -130,7 +137,9 @@ export default function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-[#1a2b4b] mb-3 uppercase tracking-tighter">General Public</h3>
                 <p className="text-slate-600 mb-6">Citizen portal to view spending, track local projects, and provide feedback on services.</p>
-                <Button variant="outline" className="w-full border-[#dc2626] text-[#dc2626] hover:bg-red-50 font-bold">Enter Portal</Button>
+                <Link href="/auth/login">
+                  <Button variant="outline" className="w-full border-[#dc2626] text-[#dc2626] hover:bg-red-50 font-bold">Enter Portal</Button>
+                </Link>
               </div>
             </Card>
           </div>
@@ -155,33 +164,18 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-[#1a2b4b] text-white pt-16 pb-8">
-        <div className="container mx-auto px-4 text-center md:text-left">
-          <div className="grid md:grid-cols-3 gap-12 mb-12">
-            <div>
-              <h4 className="font-bold text-lg mb-6 border-l-4 border-[#dc2626] pl-3 uppercase">Sushasan Nepal</h4>
-              <p className="text-blue-100 text-sm leading-relaxed opacity-80 font-medium">
-                An initiative towards a digitally transparent Nepal, ensuring every rupee is accounted for and every project is visible to the taxpayer.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-bold text-lg mb-6 border-l-4 border-[#dc2626] pl-3 uppercase">Quick Links</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm text-blue-100 font-medium">
-                <a href="#" className="hover:text-white underline-offset-4 hover:underline">Ministry of Finance</a>
-                <a href="#" className="hover:text-white underline-offset-4 hover:underline">National Planning Commission</a>
-                <a href="#" className="hover:text-white underline-offset-4 hover:underline">Audit Reports</a>
-                <a href="#" className="hover:text-white underline-offset-4 hover:underline">Procurement Portal</a>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-bold text-lg mb-6 border-l-4 border-[#dc2626] pl-3 uppercase">Support</h4>
-              <p className="text-sm text-blue-100 font-bold opacity-90">Toll Free: 1111 (Hello Sarkar)</p>
-              <p className="text-sm text-blue-100 opacity-80 mt-1">Email: info@sushasan.gov.np</p>
-            </div>
+      <footer className="bg-[#1a2b4b] text-white pt-16 pb-8 border-t border-blue-800">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto mb-10">
+            <h4 className="font-bold text-xl mb-4 uppercase tracking-widest text-[#dc2626]">Transparent Nepal</h4>
+            <p className="text-blue-100 text-sm leading-relaxed opacity-80 font-medium">
+              An initiative towards a digitally transparent Nepal, ensuring every rupee is accounted for and every project is visible to the taxpayer.
+            </p>
           </div>
-          <div className="border-t border-blue-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-blue-300 font-bold uppercase tracking-widest">
-            <p>© 2026 Government of Nepal • Digital Governance Framework</p>
-            <div className="flex gap-6">
+          
+          <div className="border-t border-blue-800/50 pt-8 flex flex-col items-center gap-4 text-[10px] text-blue-300 font-bold uppercase tracking-[0.3em]">
+            <p>© 2026 Transparent Nepal • Safa ra Pardarshi Nepal</p>
+            <div className="flex gap-6 opacity-60">
               <a href="#" className="hover:text-white">Privacy Policy</a>
               <a href="#" className="hover:text-white">Terms of Service</a>
               <a href="#" className="hover:text-white">Open Data License</a>
