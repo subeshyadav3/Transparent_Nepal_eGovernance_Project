@@ -54,7 +54,7 @@ export default function SignupPage() {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-center text-slate-900 mb-2">Create Account</h1>
-            <p className="text-center text-slate-600 text-sm">Join OpenBudget for transparency</p>
+            <p className="text-center text-slate-600 text-sm">Join Transparent Nepal for transparency</p>
           </div>
 
           {/* Error Message */}
