@@ -84,13 +84,13 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link href="/auth/login">
+              <Link href="/citizen/dashboard">
                 <Button size="lg" className="bg-[#1c3f94] hover:bg-[#152e6d] gap-2 px-8 font-bold">
-                  Explore Budgets
+                  View Dashboard
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/auth/login">
+              <Link href="/citizen/dashboard/projects">
                 <Button size="lg" variant="outline" className="border-[#1c3f94] text-[#1c3f94] hover:bg-blue-50 px-8 font-bold">
                   View Projects
                 </Button>
@@ -125,7 +125,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-[#1a2b4b] mb-3 uppercase tracking-tighter">Public Officials</h3>
                 <p className="text-slate-600 mb-6">Internal dashboard for budget entry, procurement management, and departmental reporting.</p>
                 <Link href="/auth/login">
-                   <Button className="w-full bg-[#1c3f94] hover:bg-[#152e6d] font-bold">Officer Login</Button>
+                  <Button className="w-full bg-[#1c3f94] hover:bg-[#152e6d] font-bold">Officer Login</Button>
                 </Link>
               </div>
             </Card>
@@ -172,14 +172,17 @@ export default function Home() {
               An initiative towards a digitally transparent Nepal, ensuring every rupee is accounted for and every project is visible to the taxpayer.
             </p>
           </div>
-          
+
           <div className="border-t border-blue-800/50 pt-8 flex flex-col items-center gap-4 text-[10px] text-blue-300 font-bold uppercase tracking-[0.3em]">
             <p>© 2026 Transparent Nepal • Safa ra Pardarshi Nepal</p>
-            <div className="flex gap-6 opacity-60">
-              <a href="#" className="hover:text-white">Privacy Policy</a>
-              <a href="#" className="hover:text-white">Terms of Service</a>
-              <a href="#" className="hover:text-white">Open Data License</a>
-            </div>
+            {/* <div className="flex gap-6 opacity-60">
+              <Link href="/privacy" className="hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+            </div> */}
           </div>
         </div>
       </footer>

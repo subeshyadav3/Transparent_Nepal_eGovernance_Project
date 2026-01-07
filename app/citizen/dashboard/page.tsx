@@ -96,7 +96,7 @@ export default function CitizenDashboardPage() {
       auth: false 
     },
     { 
-      href: "/citizen/dashboard/tenders", 
+      href: "#", 
       label: "Public Tenders", 
       desc: "View upcoming government contracts", 
       icon: <Newspaper className="text-slate-600" />, 
