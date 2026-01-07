@@ -2,17 +2,18 @@
 
 import { useSession, signOut, signIn } from "next-auth/react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname ,useRouter} from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { User, LogOut, Menu, X } from "lucide-react"
 import type React from "react"
 
+
 export default function CitizenLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
+  const router = useRouter()
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: "/" })
   }
@@ -28,7 +29,7 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-background overflow-hidden">
-      
+
       {/* Mobile Top Header (Only visible on mobile) */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-sky-200 z-50">
         <div className="flex flex-col">
@@ -45,9 +46,8 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
 
       {/* Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative inset-y-0 left-0 w-72 bg-gradient-to-b from-sky-50 to-sky-100 text-slate-900 border-r border-sky-200 transition-transform duration-300 ease-in-out z-40 flex flex-col`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 fixed md:relative inset-y-0 left-0 w-72 bg-gradient-to-b from-sky-50 to-sky-100 text-slate-900 border-r border-sky-200 transition-transform duration-300 ease-in-out z-40 flex flex-col`}
       >
         {/* Sidebar Logo Section (Hidden on mobile top because of the new top bar) */}
         <div className="p-8 border-b border-sky-200 hidden md:block">
@@ -63,11 +63,10 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}>
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full justify-start transition-all mb-1 h-11 ${
-                    isActive 
-                      ? "bg-sky-200 text-sky-900 font-bold border-r-4 border-sky-600 shadow-sm" 
+                  className={`w-full justify-start transition-all mb-1 h-11 ${isActive
+                      ? "bg-sky-200 text-sky-900 font-bold border-r-4 border-sky-600 shadow-sm"
                       : "hover:bg-sky-200 text-slate-700 hover:text-sky-900 font-medium"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </Button>
@@ -84,22 +83,21 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
                 <p className="text-sm font-bold text-slate-900 truncate">{session.user?.name}</p>
                 <p className="text-[10px] text-slate-500 truncate lowercase font-medium">{session.user?.email}</p>
               </div>
-              
+
               <div className="grid gap-2">
                 <Link href="/citizen/dashboard/profile" onClick={() => setSidebarOpen(false)}>
-                  <Button 
-                    variant={pathname === "/citizen/dashboard/profile" ? "secondary" : "outline"} 
-                    className={`w-full justify-start gap-2 border-sky-300 text-sky-900 hover:bg-white shadow-sm h-10 text-xs ${
-                      pathname === "/citizen/dashboard/profile" ? "bg-sky-200 border-sky-600 border-r-4" : ""
-                    }`}
+                  <Button
+                    variant={pathname === "/citizen/dashboard/profile" ? "secondary" : "outline"}
+                    className={`w-full justify-start gap-2 border-sky-300 text-sky-900 hover:bg-white shadow-sm h-10 text-xs ${pathname === "/citizen/dashboard/profile" ? "bg-sky-200 border-sky-600 border-r-4" : ""
+                      }`}
                   >
                     <User size={14} />
                     My Account & KYC
                   </Button>
                 </Link>
 
-                <Button 
-                  onClick={handleLogout} 
+                <Button
+                  onClick={handleLogout}
                   variant="destructive"
                   className="w-full justify-start gap-2 h-10 text-xs font-black uppercase tracking-wider"
                 >
@@ -109,12 +107,12 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
               </div>
             </div>
           ) : (
-            <Link
-              href={`/auth/login?callbackUrl=${pathname}`}
-              className="w-full bg-sky-600 hover:bg-sky-700 text-white shadow-md font-black uppercase tracking-widest text-xs"
+            <Button
+              onClick={() => router.push(`/auth/login?callbackUrl=${pathname}`)}
+              className="w-full bg-sky-600 hover:bg-sky-700 text-white shadow-md font-black uppercase tracking-widest text-xs h-11"
             >
               Sign In to Access
-            </Link>
+            </Button>
           )}
         </div>
       </aside>

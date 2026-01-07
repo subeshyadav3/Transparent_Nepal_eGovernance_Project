@@ -55,11 +55,11 @@ export default function LoginForm() {
       <div className="mb-8">
         <div className="flex items-center justify-center mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">OB</span>
+            <span className="text-white font-bold text-lg">TN</span>
           </div>
         </div>
         <h1 className="text-3xl font-bold text-center text-slate-900 mb-2">Welcome Back</h1>
-        <p className="text-center text-slate-600 text-sm">Sign in to OpenBudget Platform</p>
+        <p className="text-center text-slate-600 text-sm">Sign in to Transparent Nepal</p>
       </div>
 
       {error && (
@@ -71,25 +71,50 @@ export default function LoginForm() {
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
-          <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input 
+            type="email" 
+            placeholder="you@example.com" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+          />
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-          <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input 
+            type="password" 
+            placeholder="••••••••" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />
         </div>
-        <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 rounded-lg">
+        <Button 
+          type="submit" 
+          disabled={loading} 
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 rounded-lg"
+        >
           {loading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
 
       <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-300"></div></div>
-        <div className="relative flex justify-center text-sm"><span className="px-3 bg-white text-slate-500">or</span></div>
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-3 bg-white text-slate-500">or</span>
+        </div>
       </div>
 
-      <p className="text-center text-slate-600 text-sm">
-        Don't have an account? <Link href="/auth/signup" className="text-blue-600 font-semibold">Create one</Link>
+      <p className="text-center text-slate-600 text-sm mb-6">
+        Don't have an account? <Link href="/auth/signup" className="text-blue-600 font-semibold hover:text-blue-700">Create one</Link>
       </p>
+
+      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-xs text-blue-700 font-semibold">Demo Credentials:</p>
+        <p className="text-xs text-blue-700 mt-1">Citizen: ram@gmail.com / ram123</p>
+      </div>
     </div>
   )
 }
