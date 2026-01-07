@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl")
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,11 +32,12 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error)
       } else if (result?.ok) {
-        // Fetch the session to get the role
         const res = await fetch("/api/auth/session")
         const sessionData = await res.json()
 
-        if (sessionData?.user?.role === "ADMIN") {
+        if (callbackUrl) {
+          router.push(callbackUrl)
+        } else if (sessionData?.user?.role === "ADMIN") {
           router.push("/admin/dashboard")
         } else {
           router.push("/citizen/dashboard")
@@ -118,7 +121,6 @@ export default function LoginPage() {
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-xs text-blue-700 font-semibold">Demo Credentials:</p>
             <p className="text-xs text-blue-700 mt-1">Citizen: ram@gmail.com / ram123</p>
-
           </div>
         </div>
 

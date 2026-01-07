@@ -109,12 +109,12 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
               </div>
             </div>
           ) : (
-            <Button
-              onClick={() => signIn()}
+            <Link
+              href={`/auth/login?callbackUrl=${pathname}`}
               className="w-full bg-sky-600 hover:bg-sky-700 text-white shadow-md font-black uppercase tracking-widest text-xs"
             >
               Sign In to Access
-            </Button>
+            </Link>
           )}
         </div>
       </aside>
